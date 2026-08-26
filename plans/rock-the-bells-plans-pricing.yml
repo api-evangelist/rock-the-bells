@@ -1,0 +1,26 @@
+generated: '2026-08-26'
+method: searched
+source: https://shop.rockthebells.com/
+description: >-
+  Rock The Bells does not sell API access. It is a hip-hop culture brand and direct-to-consumer
+  merchandise retailer; the agent surface exists to sell PRODUCTS to shoppers, not to sell API
+  capacity to developers. There is no developer plan, tier, quota or overage of any kind, and no
+  pricing page for an API — the only prices on the property are retail prices on t-shirts, hoodies
+  and event merchandise.
+plan_count: 0
+plans: []
+plan_count_note: >-
+  An honest zero rather than an omission. Searched the storefront, its page sitemap (24 pages, none
+  developer- or pricing-related) and the agent instructions at /llms.txt and /agents.md; none of them
+  offers, mentions or gates a paid API tier. The MCP and GraphQL surfaces are free to call and
+  require no account.
+commercial_model:
+  type: direct-to-consumer retail
+  currency: USD
+  country: US
+  accepted_card_brands: [VISA, MASTERCARD, AMERICAN_EXPRESS, DISCOVER, DINERS_CLUB]
+  digital_wallets: [SHOPIFY_PAY, APPLE_PAY, GOOGLE_PAY]
+  ucp_payment_handlers: [com.google.pay, dev.shopify.card, dev.shopify.shop_pay]
+  evidence: >-
+    Storefront GraphQL query shop.paymentSettings on 2026-08-26, and the payment_handlers block of
+    https://shop.rockthebells.com/.well-known/ucp.

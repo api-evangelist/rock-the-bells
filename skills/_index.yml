@@ -1,0 +1,36 @@
+generated: '2026-08-26'
+method: generated
+source: >-
+  mcp/rock-the-bells-mcp-tools.json, graphql/rock-the-bells-storefront.graphql,
+  https://shop.rockthebells.com/llms.txt, https://shop.rockthebells.com/robots.txt,
+  https://shop.rockthebells.com/policies/refund-policy
+description: >-
+  Packaged Agent Skills for the Rock The Bells agent commerce surface. Every operation named in
+  these skills is a real tool name read from the live MCP tools/list response, and every rule,
+  error code, window and money convention is quoted from the store's own published documents. Rock
+  The Bells publishes no OpenAPI, so these are grounded in the MCP tool manifest and the introspected
+  GraphQL schema instead. Rock The Bells does not publish skills of its own — these are authored by
+  API Evangelist from its published surface, not fetched from the provider.
+skill_count: 3
+skills:
+- name: rock-the-bells-browse-catalog
+  file: rock-the-bells-browse-catalog.md
+  api: rock-the-bells-commerce-mcp
+  risk: read-only
+  operations: [search_catalog, lookup_catalog, get_product]
+  summary: Search and read the catalog. No writes, no credential.
+- name: rock-the-bells-build-cart
+  file: rock-the-bells-build-cart.md
+  api: rock-the-bells-commerce-mcp
+  risk: reversible-write
+  operations: [create_cart, get_cart, update_cart, cancel_cart, get_product]
+  summary: Build and modify a cart. Every step reversible; no money moves.
+- name: rock-the-bells-complete-purchase
+  file: rock-the-bells-complete-purchase.md
+  api: rock-the-bells-commerce-mcp
+  risk: irreversible-without-human
+  operations: [create_checkout, update_checkout, get_checkout, complete_checkout, cancel_checkout, get_order]
+  summary: >-
+    Drive checkout to a placed order. Requires contemporaneous human buyer approval — the store's
+    stated rule and the only access control on the money path. Post-purchase reversal is a 14-day
+    human return process, not an API.

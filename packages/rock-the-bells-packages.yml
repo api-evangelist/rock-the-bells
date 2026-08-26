@@ -1,0 +1,33 @@
+generated: '2026-08-26'
+method: searched
+source: >-
+  registry.npmjs.org, pypi.org, api.github.com, https://shop.rockthebells.com/llms.txt,
+  https://shop.rockthebells.com/agents.md, https://shop.rockthebells.com/sitemap.xml
+description: >-
+  Rock The Bells publishes no first-party client libraries. This is an honest zero recorded after a
+  real search, not an unchecked field. The company's agent surface is protocol-native — an MCP
+  endpoint and a GraphQL endpoint, both callable directly over HTTP with no SDK — so there is no
+  package for a consumer to install and therefore no release cadence to read as a decay signal.
+package_count: 0
+packages: []
+searched:
+- registry: npm
+  query: rockthebells, @rockthebells/*
+  result: 404 — no package under the brand name or scope.
+- registry: pypi
+  query: rockthebells
+  result: 404 — no distribution.
+- registry: github
+  query: 'api.github.com/users/rockthebells, api.github.com/orgs/rock-the-bells'
+  result: 404 — the company operates no public GitHub organization, so there is no SourceCode or SDK repo to derive candidates from.
+- surface: docs
+  query: 'llms.txt / agents.md / robots.txt / sitemap.xml'
+  result: >-
+    None mention an SDK, client library, or package. The agent instructions point exclusively at
+    protocol endpoints (/.well-known/ucp, /api/ucp/mcp) and at a third-party skill document
+    (https://shop.app/SKILL.md) which is the platform's, not Rock The Bells'.
+third_party_note: >-
+  Generic Shopify Storefront API clients exist on npm (published by the platform vendor, not by this
+  merchant) and will work against this store. None are first-party to Rock The Bells, so none are
+  listed here and no SDKs pointer is emitted — an SDKs claim would credit this company with work it
+  did not do.

@@ -1,0 +1,129 @@
+generated: '2026-08-26'
+method: probed
+source: https://shop.rockthebells.com/api/ucp/mcp
+name: Rock The Bells Commerce MCP Server (UCP)
+description: >-
+  Rock The Bells serves a live, anonymously-listable Model Context Protocol server on its own
+  storefront host at https://shop.rockthebells.com/api/ucp/mcp. It implements the Universal
+  Commerce Protocol (UCP) shopping service, exposing 13 tools that let an agent search the
+  Rock The Bells catalog, build a cart, and drive a checkout to completion. The endpoint is
+  advertised by the store's own /llms.txt, /agents.md and /robots.txt.
+status: published
+
+deployment:
+  mode: remote
+  endpoint: https://shop.rockthebells.com/api/ucp/mcp
+  install: null
+  package: null
+  auth: none
+  verified: probed
+  note: >-
+    An unauthenticated POST of {"jsonrpc":"2.0","id":1,"method":"tools/list"} returned HTTP 200 with
+    the full 13-tool manifest including complete inputSchema for every tool (52,007 bytes, saved
+    verbatim to mcp/rock-the-bells-mcp-tools.json). No API key, OAuth challenge or storefront token
+    was required to enumerate the tool surface. Payment completion is a separate matter: the store's
+    own agent instructions require contemporaneous human buyer approval before any checkout is
+    completed, so `auth: none` describes DISCOVERY, not authorization to transact.
+
+ownership:
+  verified: true
+  evidence: >-
+    The MCP endpoint is served from shop.rockthebells.com, a host Rock The Bells controls (DNS CNAME
+    to rock-the-bells.myshopify.com). The store's own Storefront GraphQL API reports
+    shop.name = "Rock The Bells" and shop.primaryDomain.url = "https://shop.rockthebells.com", and
+    every product in /products.json carries vendor "Rock The Bells". The MCP server itself is
+    Shopify-native infrastructure (Shopify implements UCP for every store), so the PROTOCOL and tool
+    shapes are Shopify's, while the CATALOG, cart, checkout and order data the tools operate on are
+    Rock The Bells'. Recorded here as a real agent surface the company serves, not as a bespoke API
+    Rock The Bells engineered.
+
+protocol:
+  name: Model Context Protocol
+  transport: streamable-http
+  jsonrpc: '2.0'
+  ucp_version: '2026-04-08'
+  ucp_supported_versions:
+  - '2026-04-08'
+  - '2026-01-23'
+  discovery: https://shop.rockthebells.com/.well-known/ucp
+
+x-evidence:
+  fetched: '2026-08-26'
+  url: https://shop.rockthebells.com/api/ucp/mcp
+  method: POST tools/list
+  http_status: 200
+  content_type: application/json; charset=utf-8
+  bytes: 52007
+  tool_count: 13
+
+tool_count: 13
+tools:
+- name: search_catalog
+  category: catalog
+  description: Search for products from the online store, hosted on Shopify.
+  required: [meta, catalog]
+- name: lookup_catalog
+  category: catalog
+  description: Look up multiple products or variants by identifier.
+  required: [meta, catalog]
+- name: get_product
+  category: catalog
+  description: Retrieve complete product detail by identifier. Returns a singular product.
+  required: [meta, catalog]
+- name: create_cart
+  category: cart
+  description: Creates a new cart.
+  required: [meta, cart]
+- name: get_cart
+  category: cart
+  description: Get the cart contents.
+  required: [meta, id]
+- name: update_cart
+  category: cart
+  description: Perform updates to a cart.
+  required: [meta, cart, id]
+- name: cancel_cart
+  category: cart
+  description: Cancels a cart.
+  required: [meta, id]
+  reversal_of: create_cart
+- name: create_checkout
+  category: checkout
+  description: Creates a checkout. Returns checkout details, including line items, totals, and any applicable discounts or taxes.
+  required: [meta, checkout]
+- name: get_checkout
+  category: checkout
+  description: Returns details about the checkout, including line items, totals, and any applicable discounts or taxes.
+  required: [meta, id]
+- name: update_checkout
+  category: checkout
+  description: Updates a checkout. Returns checkout details, including line items, totals, and any applicable discounts or taxes.
+  required: [meta, checkout, id]
+- name: complete_checkout
+  category: checkout
+  description: Completes a checkout and returns the checkout result.
+  required: [meta, id, checkout]
+  idempotency_key: meta.idempotency-key
+  human_approval_required: true
+- name: cancel_checkout
+  category: checkout
+  description: Cancels a checkout.
+  required: [meta, id]
+  reversal_of: create_checkout
+- name: get_order
+  category: order
+  description: Get the details of an order.
+  required: [meta, id]
+
+conventions:
+  money: >-
+    Prices are integers in the currency's ISO 4217 MINOR units paired with a currency code —
+    {"amount": 2500, "currency": "USD"} is $25.00. Stated verbatim in every tool description.
+  agent_profile_required: >-
+    Every tool requires a `meta.ucp-agent.profile` URI so the store can identify the calling agent.
+  buyer_context: Pass context.address_country and context.currency for accurate pricing and availability.
+
+artifacts:
+  tools_manifest: mcp/rock-the-bells-mcp-tools.json
+  ucp_discovery: well-known/rock-the-bells-ucp.json
+  agent_instructions: llms/rock-the-bells-llms.txt

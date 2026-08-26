@@ -1,0 +1,173 @@
+generated: '2026-08-26'
+method: derived
+source: >-
+  mcp/rock-the-bells-mcp-tools.json (live tools/list, 13 tools, HTTP 200 2026-08-26),
+  graphql/rock-the-bells-storefront.graphql (live anonymous introspection, 414 types,
+  34 QueryRoot fields, 41 Mutation fields)
+description: >-
+  Binding between the 13 UCP/MCP tools Rock The Bells serves and the Storefront GraphQL operations
+  that back the same capability. There is NO OpenAPI on this provider — every REST probe
+  (/openapi.json, /openapi.yaml, /swagger.json, /api-docs) returned 404 — so the `rest` column is
+  empty on every row by fact, not by omission, and the real crosswalk is MCP tool -> GraphQL field.
+  Both surfaces were enumerated anonymously, so these are real names on both sides; what is DERIVED
+  is the semantic pairing between them, and confidence is set accordingly.
+surfaces:
+  openapi:
+    present: false
+    note: >-
+      Probed https://shop.rockthebells.com/openapi.json, /openapi.yaml, /swagger.json, /api-docs and
+      /.well-known/api-catalog on 2026-08-26 — all 404. No REST contract is published.
+  graphql:
+    endpoint: https://shop.rockthebells.com/api/2026-07/graphql.json
+    gated: false
+    note: Full introspection anonymously; schema capture taken at the /api/2024-10/ path, which still resolves.
+    artifact: graphql/rock-the-bells-storefront.graphql
+  mcp:
+    endpoint: https://shop.rockthebells.com/api/ucp/mcp
+    gated: false
+    note: tools/list returned all 13 tools with complete inputSchema, no credential.
+    artifact: mcp/rock-the-bells-mcp-tools.json
+  rest_json:
+    note: >-
+      Undocumented but live public JSON endpoints exist (/products.json, /collections.json,
+      /products/{handle}.json). They are platform conventions with no contract, so they are recorded
+      as a note rather than mapped as operations.
+
+crosswalk:
+- tool: search_catalog
+  category: catalog
+  rest: []
+  graphql: [products, search, predictiveSearch, productRecommendations]
+  binding: capability
+  confidence: high
+  note: >-
+    Free-text and filtered catalog search. GraphQL splits this across a filtered `products`
+    connection and a relevance-ranked `search`/`predictiveSearch`; the single MCP tool covers both.
+- tool: lookup_catalog
+  category: catalog
+  rest: []
+  graphql: [nodes, productByHandle, collectionByHandle]
+  binding: capability
+  confidence: high
+  note: Batch resolution by identifier. `nodes` is the GraphQL multi-id equivalent.
+- tool: get_product
+  category: catalog
+  rest: []
+  graphql: [product, productByHandle, node]
+  binding: direct
+  confidence: high
+  note: Single product by gid://shopify/Product/{id} or handle.
+- tool: create_cart
+  category: cart
+  rest: []
+  graphql: [cartCreate]
+  binding: direct
+  confidence: high
+- tool: get_cart
+  category: cart
+  rest: []
+  graphql: [cart]
+  binding: direct
+  confidence: high
+- tool: update_cart
+  category: cart
+  rest: []
+  graphql: [cartLinesAdd, cartLinesUpdate, cartLinesRemove, cartNoteUpdate, cartAttributesUpdate, cartDiscountCodesUpdate, cartGiftCardCodesAdd, cartGiftCardCodesRemove, cartBuyerIdentityUpdate]
+  binding: composite
+  confidence: high
+  note: >-
+    One MCP tool collapses nine GraphQL mutations. This is the largest shape difference between the
+    surfaces and the main reason an agent should prefer MCP here — the tool takes a whole desired
+    cart state, where GraphQL requires choosing the right mutation per field.
+- tool: cancel_cart
+  category: cart
+  rest: []
+  graphql: [cartRemovePersonalData]
+  binding: approximate
+  confidence: low
+  note: >-
+    No GraphQL mutation deletes a cart. cartRemovePersonalData is the closest published equivalent
+    (it strips buyer data from the cart) and is NOT an exact match. Recorded honestly as approximate.
+- tool: create_checkout
+  category: checkout
+  rest: []
+  graphql: [cartCreate, cartPrepareForCompletion]
+  binding: composite
+  confidence: medium
+  note: >-
+    The legacy Checkout object has been retired from this Storefront schema; checkout survives only
+    as an MCP concept. On GraphQL the equivalent is a cart moved toward completion.
+- tool: get_checkout
+  category: checkout
+  rest: []
+  graphql: [cart, cartCompletionAttempt]
+  binding: approximate
+  confidence: medium
+- tool: update_checkout
+  category: checkout
+  rest: []
+  graphql: [cartBuyerIdentityUpdate, cartDeliveryAddressesAdd, cartDeliveryAddressesUpdate, cartSelectedDeliveryOptionsUpdate, cartBillingAddressUpdate, cartPaymentUpdate]
+  binding: composite
+  confidence: high
+  note: Shipping address, delivery method and payment selection — six mutations behind one tool.
+- tool: complete_checkout
+  category: checkout
+  rest: []
+  graphql: [cartSubmitForCompletion, shopPayPaymentRequestSessionSubmit]
+  binding: direct
+  confidence: high
+  note: >-
+    THE MONEY OPERATION on both surfaces, and the only one carrying idempotency on both:
+    meta.idempotency-key on MCP, idempotencyKey (String!, required) on
+    shopPayPaymentRequestSessionSubmit. Requires contemporaneous human buyer approval per the
+    store's own llms.txt and robots.txt.
+- tool: cancel_checkout
+  category: checkout
+  rest: []
+  graphql: []
+  binding: none
+  confidence: high
+  note: MCP-only. No GraphQL mutation cancels a submitted completion attempt.
+- tool: get_order
+  category: order
+  rest: []
+  graphql: [customer]
+  binding: gated-equivalent
+  confidence: medium
+  note: >-
+    On GraphQL, orders are reachable only through Customer.orders behind a customerAccessToken. The
+    MCP tool takes an order id directly, so the two paths differ in what they require of the caller.
+
+mcp_only:
+- tool: cancel_checkout
+  reason: No GraphQL mutation exists to cancel a checkout/completion attempt on this API version.
+- tool: create_checkout
+  reason: >-
+    Partly MCP-only in shape — the Checkout entity does not exist in this Storefront schema at all;
+    GraphQL models the same stage as a Cart being prepared for completion.
+
+graphql_only:
+- fields: [customerCreate, customerAccessTokenCreate, customerAccessTokenRenew, customerAccessTokenDelete, customerActivate, customerRecover, customerReset, customerUpdate, customerAddressCreate, customerAddressUpdate, customerAddressDelete, customerDefaultAddressUpdate]
+  reason: Buyer account management. The MCP surface exposes no account lifecycle at all — it is transactional only.
+- fields: [blog, blogs, blogByHandle, article, articles, page, pages, pageByHandle, metaobject, metaobjects, menu, urlRedirects, sitemap]
+  reason: >-
+    Editorial and content. Rock The Bells runs five blogs and 24 pages, all queryable on GraphQL and
+    entirely invisible to the MCP tools, which see only commerce.
+- fields: [shop, paymentSettings, localization, locations, publicApiVersions, productTags, productTypes]
+  reason: Shop metadata, localization and API-version introspection. No MCP equivalent.
+- fields: [cartClone, cartMetafieldsSet, cartMetafieldDelete, cartDeliveryAddressesRemove, cartDeliveryAddressesReplace, cartGiftCardCodesUpdate]
+  reason: Fine-grained cart operations with no distinct tool; some are absorbed into update_cart, some have no equivalent.
+
+rest_only: []
+
+coverage:
+  mcp_tools: 13
+  mcp_tools_mapped_to_graphql: 12
+  mcp_tools_with_no_graphql_equivalent: 1
+  graphql_root_query_fields: 34
+  graphql_mutation_fields: 41
+  graphql_fields_with_no_tool: 44
+  openapi_operations: 0
+  note: >-
+    The MCP surface is a deliberate narrowing, not a wrapper: it covers the buy path completely and
+    nothing else. An agent that needs content, account or shop metadata must drop to GraphQL.

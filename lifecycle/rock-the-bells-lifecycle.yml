@@ -1,0 +1,106 @@
+generated: '2026-08-26'
+method: probed
+source: >-
+  https://shop.rockthebells.com/api/2024-10/graphql.json (publicApiVersions),
+  https://shop.rockthebells.com/.well-known/ucp
+description: >-
+  Versioning and deprecation posture for the Rock The Bells agent surfaces. Both surfaces version on
+  a dated calendar and both publish their supported set as MACHINE-READABLE DATA rather than as a
+  prose policy page — the GraphQL API answers a publicApiVersions query, and the UCP profile carries
+  a supported_versions map. That is a stronger deprecation signal than most providers in the catalog
+  manage, though it is inherited from the platform rather than authored by Rock The Bells.
+
+versioning:
+  graphql:
+    scheme: dated calendar version in the URL path
+    pattern: https://shop.rockthebells.com/api/{YYYY-MM}/graphql.json
+    current: '2026-07'
+    self_describing: true
+    query: '{ publicApiVersions { handle supported displayName } }'
+    versions:
+    - handle: '2025-10'
+      supported: true
+    - handle: '2026-01'
+      supported: true
+    - handle: '2026-04'
+      supported: true
+    - handle: '2026-07'
+      supported: true
+      latest: true
+    - handle: '2026-10'
+      supported: false
+      note: Release candidate.
+    - handle: unstable
+      supported: false
+    probed_against: '2024-10'
+    probed_note: >-
+      This profile's schema capture was taken at /api/2024-10/, which still answered HTTP 200 and
+      introspected fully even though 2024-10 no longer appears in the supported set — the platform
+      keeps older dated paths resolvable.
+  ucp:
+    scheme: dated protocol version
+    current: '2026-04-08'
+    supported:
+    - '2026-04-08'
+    - '2026-01-23'
+    per_version_profiles:
+      '2026-04-08': https://rock-the-bells.myshopify.com/.well-known/ucp/2026-04-08
+      '2026-01-23': https://rock-the-bells.myshopify.com/.well-known/ucp/2026-01-23
+
+deprecation:
+  policy_published: true
+  policy_form: >-
+    Machine-readable rather than narrative. Supported-version membership is queryable
+    (publicApiVersions.supported) and per-field deprecation is carried in the schema itself.
+  deprecated_field_count: 49
+  deprecated_field_note: >-
+    49 fields across the live Storefront schema carry a GraphQL @deprecated directive with a
+    machine-readable reason string, so a client can detect its own exposure by introspection alone.
+  sunset_header: not observed
+  deprecation_header: not observed
+  rfc8594: false
+  evidence: graphql/rock-the-bells-storefront.graphql
+
+status_page:
+  published: false
+  note: >-
+    Rock The Bells publishes no status page of its own. Searched the storefront, its 24-page sitemap
+    and the agent instructions; no status, uptime or incident surface is linked. The underlying
+    platform operates one, but it is not Rock The Bells' and is not referenced from any Rock The
+    Bells property, so no StatusPage pointer is emitted.
+
+sla:
+  published: false
+  note: No service-level agreement is published for the API surfaces; there is no API contract to hold one.
+
+support:
+  customer_care_email: customercare@rockthebells.com
+  contact_page: https://shop.rockthebells.com/pages/contact
+  faq: https://shop.rockthebells.com/pages/faq
+  evidence: https://shop.rockthebells.com/policies/refund-policy
+
+site_health:
+  finding: >-
+    Two real defects on Rock The Bells' own hosts, both worth reporting to the provider.
+  issues:
+  - id: www-tls-hostname-mismatch
+    severity: high
+    host: www.rockthebells.com
+    detail: >-
+      www.rockthebells.com resolves (CNAME rtbs.netlify.app) but the TLS edge presents a DigiCert
+      wildcard certificate for *.netlify.app, which does not cover the requested hostname. curl
+      exits 60 with "no alternative certificate subject name matches target host name". Any
+      standards-compliant browser or agent hitting the www form of the brand's own domain gets a
+      certificate error rather than the site.
+    observed: '2026-08-26'
+    status: 0
+  - id: apex-is-an-empty-placeholder
+    severity: medium
+    host: rockthebells.com
+    detail: >-
+      The apex returns HTTP 200 but the rendered body text is the single line "Rock The Bells
+      Homepage" — a Next.js shell with no content, no navigation and no links beyond favicons.
+      /robots.txt and /sitemap.xml both 404, so the brand's primary domain is invisible to crawlers
+      and agents. All real content lives on shop.rockthebells.com.
+    observed: '2026-08-26'
+    status: 200

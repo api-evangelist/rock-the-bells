@@ -1,0 +1,71 @@
+generated: '2026-08-26'
+method: derived
+source: graphql/rock-the-bells-storefront.graphql, mcp/rock-the-bells-mcp-tools.json
+description: >-
+  Error catalog derived from the live Storefront GraphQL schema and the live MCP tool manifest. This
+  is not RFC 9457 — the surface uses typed GraphQL UserError objects returned inside a 200 response,
+  plus JSON-RPC error envelopes on MCP. The enumerated codes below are read verbatim from the
+  introspected schema, so they are the real codes a client will receive.
+format: graphql-user-errors
+rfc9457: false
+envelope:
+  graphql:
+    location: mutation payload (not HTTP status)
+    http_status_on_error: 200
+    interface: DisplayableError
+    interface_fields:
+    - field
+    - message
+    note: >-
+      Typed error objects implement DisplayableError, and the richer ones add a `code` enum. A client
+      must inspect the payload; the HTTP status is not the signal.
+  mcp:
+    style: JSON-RPC 2.0
+    location: response.error
+  http:
+    '404': Storefront returns an HTML 404 page for unknown paths.
+    '429': Documented on the MCP endpoint; back off.
+error_types:
+- name: CartUserError
+  fields: [code, field, message]
+  code_enum: CartErrorCode
+  codes: [INVALID, LESS_THAN, INVALID_MERCHANDISE_LINE, MERCHANDISE_NOT_APPLICABLE, MISSING_DISCOUNT_CODE, MISSING_NOTE, NOTE_TOO_LONG, INVALID_DELIVERY_GROUP, INVALID_DELIVERY_OPTION, PENDING_DELIVERY_GROUPS, INVALID_PAYMENT, PAYMENT_METHOD_NOT_SUPPORTED, PAYMENT_METHOD_NOT_APPLICABLE, INVALID_PAYMENT_DEFERRED_PAYMENT_REQUIRED]
+  applies_to: cart mutations
+- name: CartOperationError
+  fields: [code, message]
+  applies_to: cart operations
+- name: CompletionError
+  fields: [code, message]
+  code_enum: CompletionErrorCode
+  codes: [ERROR, INVENTORY_RESERVATION_ERROR, PAYMENT_ERROR, PAYMENT_TRANSIENT_ERROR, PAYMENT_AMOUNT_TOO_SMALL, PAYMENT_GATEWAY_NOT_ENABLED_ERROR, PAYMENT_INSUFFICIENT_FUNDS, PAYMENT_INVALID_PAYMENT_METHOD, PAYMENT_INVALID_CURRENCY, PAYMENT_INVALID_CREDIT_CARD, PAYMENT_INVALID_BILLING_ADDRESS, PAYMENT_CARD_DECLINED, PAYMENT_CALL_ISSUER]
+  applies_to: cart completion / payment
+  agent_note: >-
+    PAYMENT_TRANSIENT_ERROR is the one code in this set that is safe to retry. The remaining PAYMENT_*
+    codes are terminal for the given instrument and require buyer intervention, not a retry loop.
+- name: SubmissionError
+  fields: [code, message]
+  code_enum: SubmissionErrorCode
+  codes_sample: [ERROR, NO_DELIVERY_GROUP_SELECTED, BUYER_IDENTITY_EMAIL_IS_INVALID, BUYER_IDENTITY_EMAIL_REQUIRED, BUYER_IDENTITY_PHONE_IS_INVALID, DELIVERY_ADDRESS1_INVALID, DELIVERY_ADDRESS1_REQUIRED, DELIVERY_ADDRESS1_TOO_LONG, DELIVERY_CITY_INVALID, DELIVERY_CITY_REQUIRED, DELIVERY_CITY_TOO_LONG]
+  applies_to: cartSubmitForCompletion
+  note: Validation failures on buyer identity and delivery address; each names the offending field.
+- name: CustomerUserError
+  fields: [code, field, message]
+  code_enum: CustomerErrorCode
+  codes: [BLANK, INVALID, TAKEN, TOO_LONG, TOO_SHORT, UNIDENTIFIED_CUSTOMER, CUSTOMER_DISABLED, PASSWORD_STARTS_OR_ENDS_WITH_WHITESPACE, CONTAINS_HTML_TAGS, CONTAINS_URL, TOKEN_INVALID, ALREADY_ENABLED, NOT_FOUND, BAD_DOMAIN]
+  applies_to: customer account mutations
+- name: UserErrorsShopPayPaymentRequestSessionUserErrors
+  fields: [code, field, message]
+  codes: [PAYMENT_REQUEST_INVALID_INPUT, PAYMENT_REQUEST_NOT_FOUND, IDEMPOTENCY_KEY_ALREADY_USED]
+  applies_to: shopPayPaymentRequestSession mutations
+  agent_note: >-
+    IDEMPOTENCY_KEY_ALREADY_USED is the observable proof that idempotency is enforced rather than
+    merely accepted — a replayed key is rejected by name. See conventions/ for the mechanism.
+- name: MetafieldDeleteUserError
+  fields: [code, field, message]
+  codes: [INVALID_OWNER, METAFIELD_DOES_NOT_EXIST, APP_NOT_AUTHORIZED]
+- name: MetafieldsSetUserError
+  fields: [code, elementIndex, field, message]
+  codes: [BLANK, INCLUSION, LESS_THAN_OR_EQUAL_TO, PRESENT, TOO_SHORT, TOO_LONG, INVALID_OWNER, INVALID_VALUE, INVALID_TYPE, APP_NOT_AUTHORIZED]
+- name: UserError
+  fields: [field, message]
+  note: The untyped base error; carries no code.

@@ -1,0 +1,107 @@
+generated: '2026-08-26'
+method: probed
+source: >-
+  https://shop.rockthebells.com/.well-known/ucp,
+  https://shop.rockthebells.com/api/ucp/mcp,
+  https://shop.rockthebells.com/api/2024-10/graphql.json,
+  https://shop.rockthebells.com/robots.txt
+description: >-
+  Standards conformance asserted from the contracts Rock The Bells actually serves, not from prose
+  claims. The headline result is a domain-standard signature: the store declares and serves the
+  Universal Commerce Protocol (UCP) 2026-04-08 for agent-driven commerce, discoverable at a
+  well-known path and callable over MCP.
+
+standards:
+- id: ucp
+  name: Universal Commerce Protocol
+  version: '2026-04-08'
+  conforms: true
+  domain_standard: true
+  market: agentic commerce / retail checkout
+  evidence: >-
+    GET https://shop.rockthebells.com/.well-known/ucp -> HTTP 200 application/json. The document
+    declares ucp.version "2026-04-08", supported_versions ["2026-04-08","2026-01-23"], the
+    service "dev.ucp.shopping" with transport "mcp" and endpoint
+    https://rock-the-bells.myshopify.com/api/ucp/mcp, and the capability URNs
+    dev.ucp.shopping.checkout, .fulfillment, .discount, .cart, .order, .catalog.search,
+    .catalog.lookup plus the dev.shopify.catalog extension.
+  spec: https://ucp.dev/2026-04-08/specification/overview/
+  artifact: well-known/rock-the-bells-ucp.json
+- id: mcp
+  name: Model Context Protocol
+  version: JSON-RPC 2.0 over streamable HTTP
+  conforms: true
+  evidence: >-
+    POST https://shop.rockthebells.com/api/ucp/mcp with method "tools/list" -> HTTP 200 returning a
+    well-formed JSON-RPC 2.0 envelope {"jsonrpc":"2.0","id":1,"result":{"tools":[...]}} with 13
+    tools, each carrying a name, description and a complete inputSchema.
+  artifact: mcp/rock-the-bells-mcp-tools.json
+- id: json-schema-2020-12
+  name: JSON Schema draft 2020-12
+  conforms: true
+  evidence: >-
+    Every one of the 13 MCP tool inputSchema objects declares
+    "$schema": "https://json-schema.org/draft/2020-12/schema".
+  artifact: mcp/rock-the-bells-mcp-tools.json
+- id: graphql
+  name: GraphQL
+  version: Shopify Storefront API 2024-10
+  conforms: true
+  evidence: >-
+    POST https://shop.rockthebells.com/api/2024-10/graphql.json -> HTTP 200. Full introspection
+    succeeded ANONYMOUSLY, returning a 414-type schema with QueryRoot (34 root fields) and Mutation
+    (41 fields). SDL rendered to graphql/rock-the-bells-storefront.graphql.
+  artifact: graphql/rock-the-bells-storefront.graphql
+- id: llms-txt
+  name: llms.txt
+  conforms: true
+  evidence: >-
+    GET https://shop.rockthebells.com/llms.txt -> HTTP 200 text/markdown, 4,420 bytes, titled
+    "# Agent Instructions — Rock The Bells". Mirrored at /agents.md, which the store's own
+    robots.txt and a dedicated sitemap_agentic_discovery.xml both point at.
+  artifact: llms/rock-the-bells-llms.txt
+- id: rfc9309
+  name: Robots Exclusion Protocol
+  conforms: true
+  evidence: >-
+    GET https://shop.rockthebells.com/robots.txt -> HTTP 200. Non-default, agent-aware policy: it
+    names the UCP discovery and MCP endpoints in comments, disallows the AJAX cart surfaces
+    (/cart.js, /recommendations/products) with the explicit instruction that "agents should use
+    UCP/MCP instead", and states that checkouts require contemporaneous human approval.
+  note: >-
+    Rock The Bells' apex host rockthebells.com serves NO robots.txt at all (404), so this policy
+    covers the storefront only.
+- id: sitemaps-org
+  name: Sitemaps 0.9
+  conforms: true
+  evidence: >-
+    GET https://shop.rockthebells.com/sitemap.xml -> HTTP 200 sitemapindex with five children,
+    including a purpose-built sitemap_agentic_discovery.xml whose only entry is /agents.md.
+- id: iso4217
+  name: ISO 4217 currency minor units
+  conforms: true
+  evidence: >-
+    Every MCP tool description states that monetary amounts are integers in the currency's ISO 4217
+    minor units paired with a currency code.
+- id: iso3166-1-alpha-2
+  name: ISO 3166-1 alpha-2 country codes
+  conforms: true
+  evidence: >-
+    Billing and delivery address schemas in the MCP checkout tools require address_country "in
+    2-letter ISO 3166-1 alpha-2 format".
+- id: oauth2
+  name: OAuth 2.0
+  conforms: false
+  evidence: >-
+    No OAuth surface. /.well-known/oauth-authorization-server and /.well-known/oauth-protected-resource
+    both 404 on every host, and the MCP endpoint issued no OAuth challenge.
+- id: rfc9457
+  name: RFC 9457 Problem Details
+  conforms: false
+  evidence: >-
+    Errors are not application/problem+json. GraphQL uses typed UserError objects implementing the
+    DisplayableError interface; MCP uses JSON-RPC error envelopes.
+- id: rfc9116
+  name: RFC 9116 security.txt
+  conforms: false
+  evidence: /.well-known/security.txt returned 404 on all three hosts.

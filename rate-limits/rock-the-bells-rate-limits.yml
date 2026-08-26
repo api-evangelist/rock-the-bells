@@ -1,0 +1,45 @@
+generated: '2026-08-26'
+method: probed
+source: >-
+  https://shop.rockthebells.com/llms.txt,
+  https://shop.rockthebells.com/api/2024-10/graphql.json
+description: >-
+  Rock The Bells publishes a rate-limit POLICY but no numbers. The store's agent instructions state
+  that the MCP endpoint is rate-limited per IP and that agents must back off on 429, without naming
+  a quota or window. The GraphQL surface is more informative at runtime: every response carries a
+  query-cost extension, which is the actual budget signal an agent should read.
+limit_count: 0
+limit_count_note: >-
+  Zero PUBLISHED numeric limits. This is an honest zero, not an unchecked field — the policy exists
+  and is documented, but no request-per-window figure, burst allowance or quota is stated anywhere
+  on the store's own surface.
+limits: []
+signals:
+- surface: MCP
+  endpoint: https://shop.rockthebells.com/api/ucp/mcp
+  scope: per-IP
+  window: not stated
+  limit: not stated
+  status_on_exhaustion: 429
+  client_guidance: Back off on 429 responses.
+  headers: not documented
+  evidence: >-
+    llms.txt, "Important Rules": "Respect rate limits. The MCP endpoint is rate-limited per IP.
+    Back off on 429 responses."
+- surface: GraphQL Storefront
+  endpoint: https://shop.rockthebells.com/api/2024-10/graphql.json
+  scope: per-query calculated cost
+  model: query-cost budget rather than request count
+  runtime_signal: extensions.cost
+  observed: >-
+    OBSERVED LIVE on 2026-08-26. A two-field query returned
+    "extensions":{"cost":{"requestedQueryCost":4}}; the introspection query returned
+    "requestedQueryCost":3. The cost object is returned on every response, so an agent can read its
+    consumption per call without any documentation.
+  headers: none (cost is carried in the GraphQL response body, not in HTTP headers)
+retry_after_supported: unknown
+notes: >-
+  No X-RateLimit-*, RateLimit-* or Retry-After header was observed on any successful response, and
+  no 429 was triggered during probing (nothing here was load-tested — deliberately). An agent
+  integrating with this store should treat extensions.cost as the primary budget signal on GraphQL
+  and 429-with-backoff as the only contract on MCP.

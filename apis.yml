@@ -1,18 +1,90 @@
 aid: rock-the-bells
-name: Rock the Bells
-description: 'Rock the Bells is a company surfaced via the API Evangelist harvest backlog (source: secondary-market)
-  and added to the network as a stub for full-pipeline profiling.'
+name: Rock The Bells
+description: >-
+  Rock The Bells is the hip-hop culture brand and direct-to-consumer merchandise retailer founded by
+  LL COOL J, describing itself on its own storefront as "The Home For All Things Classic and Timeless
+  Hip-Hop". It sells apparel and accessories and publishes editorial across five blogs (features,
+  artists, videos, From Jamaica to the Bronx, and COHH). It ships no developer program and no
+  OpenAPI, but it does serve a live, anonymously callable agent commerce surface: a Universal
+  Commerce Protocol (UCP 2026-04-08) merchant profile at /.well-known/ucp, a 13-tool Model Context
+  Protocol server at /api/ucp/mcp, a fully introspectable Storefront GraphQL API, and an agent
+  instruction document at /llms.txt and /agents.md that its robots.txt and a purpose-built
+  sitemap_agentic_discovery.xml both point at. Discovery is open; payment is gated by a stated
+  human-approval invariant rather than by a credential.
+image: https://shop.rockthebells.com/cdn/shop/files/RTB-Logo_dbd6e9a5-9b51-485a-970c-04d742548a60.png?v=1749612774
 url: https://raw.githubusercontent.com/api-evangelist/rock-the-bells/refs/heads/main/apis.yml
 x-type: company
 x-source: harvest:secondary-market
-x-tier: stub
-x-tier-reason: harvest
+x-tier: profiled
+x-tier-reason: enrichment
 specificationVersion: '0.20'
 created: '2026-08-26'
 modified: '2026-08-26'
 tags:
 - Company
-apis: []
+- Retail
+- Ecommerce
+- Merchandise
+- Apparel
+- Agentic Commerce
+- Model Context Protocol
+- Universal Commerce Protocol
+- GraphQL
+- Media
+- Music
+- Hip-Hop
+apis:
+- aid: rock-the-bells-commerce-mcp
+  name: Rock The Bells Commerce MCP Server (UCP)
+  description: >-
+    A live, remote Model Context Protocol server on Rock The Bells' own storefront host implementing
+    the Universal Commerce Protocol shopping service. Thirteen tools let an agent search the catalog,
+    look up and retrieve products, build and cancel a cart, and create, update, complete or cancel a
+    checkout, plus retrieve an order. Every tool carries a complete JSON Schema 2020-12 inputSchema,
+    enumerated anonymously — no API key, no OAuth challenge. Completing payment requires
+    contemporaneous human buyer approval, which the store states in both llms.txt and robots.txt.
+  humanURL: https://shop.rockthebells.com/llms.txt
+  baseURL: https://shop.rockthebells.com/api/ucp/mcp
+  tags:
+  - MCP
+  - Agentic Commerce
+  - Checkout
+  - Catalog
+  properties:
+  - type: MCPServer
+    url: mcp/rock-the-bells-mcp.yml
+  - type: ToolCrosswalk
+    url: mcp/rock-the-bells-tool-crosswalk.yml
+  - type: WellKnown
+    url: well-known/rock-the-bells-well-known.yml
+  - type: JSONSchema
+    url: json-schema/rock-the-bells-ucp-tool-schemas.json
+  - type: Documentation
+    url: https://shop.rockthebells.com/llms.txt
+- aid: rock-the-bells-storefront-graphql
+  name: Rock The Bells Storefront GraphQL API
+  description: >-
+    The Shopify Storefront GraphQL API as served on Rock The Bells' own domain. Full introspection
+    succeeded anonymously on 2026-08-26, returning a 414-type schema with 34 root query fields and 41
+    mutations covering products, variants, collections, carts, customer accounts, blogs, articles,
+    pages and Shop Pay payment request sessions. Dated calendar versioning in the URL path; every
+    response carries an extensions.cost query budget.
+  humanURL: https://shop.rockthebells.com/llms.txt
+  baseURL: https://shop.rockthebells.com/api/2026-07/graphql.json
+  tags:
+  - GraphQL
+  - Ecommerce
+  - Catalog
+  - Cart
+  properties:
+  - type: GraphQL
+    url: graphql/rock-the-bells-storefront.graphql
+  - type: DataModel
+    url: data-model/rock-the-bells-data-model.yml
+  - type: ErrorCatalog
+    url: errors/rock-the-bells-problem-types.yml
+  - type: Authentication
+    url: authentication/rock-the-bells-authentication.yml
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
@@ -20,4 +92,61 @@ maintainers:
   email: info@apis.io
 common:
 - type: Website
-  url: https://www.nasdaqprivatemarket.com/
+  url: https://shop.rockthebells.com/
+- type: Documentation
+  url: https://shop.rockthebells.com/llms.txt
+- type: LLMsTxt
+  url: llms/rock-the-bells-llms.txt
+- type: AgentSkill
+  url: skills/_index.yml
+- type: MCPServer
+  url: mcp/rock-the-bells-mcp.yml
+- type: ToolCrosswalk
+  url: mcp/rock-the-bells-tool-crosswalk.yml
+- type: WellKnown
+  url: well-known/rock-the-bells-well-known.yml
+- type: GraphQL
+  url: graphql/rock-the-bells-storefront.graphql
+- type: JSONSchema
+  url: json-schema/rock-the-bells-ucp-tool-schemas.json
+- type: Conventions
+  url: conventions/rock-the-bells-conventions.yml
+- type: Idempotency
+  url: conventions/rock-the-bells-conventions.yml
+- type: DataModel
+  url: data-model/rock-the-bells-data-model.yml
+- type: ErrorCatalog
+  url: errors/rock-the-bells-problem-types.yml
+- type: Authentication
+  url: authentication/rock-the-bells-authentication.yml
+- type: Conformance
+  url: conformance/rock-the-bells-conformance.yml
+- type: Lifecycle
+  url: lifecycle/rock-the-bells-lifecycle.yml
+- type: Deprecation
+  url: lifecycle/rock-the-bells-lifecycle.yml
+- type: Plans
+  url: plans/rock-the-bells-plans-pricing.yml
+- type: RateLimits
+  url: rate-limits/rock-the-bells-rate-limits.yml
+- type: Packages
+  url: packages/rock-the-bells-packages.yml
+- type: DomainSecurity
+  url: security/rock-the-bells-domain-security.yml
+- type: Blog
+  url: https://shop.rockthebells.com/blogs/articles
+- type: Support
+  url: https://shop.rockthebells.com/pages/contact
+- type: HelpCenter
+  url: https://shop.rockthebells.com/pages/faq
+- type: TermsOfService
+  url: https://shop.rockthebells.com/policies/terms-of-service
+- type: PrivacyPolicy
+  url: https://shop.rockthebells.com/policies/privacy-policy
+- type: RefundPolicy
+  url: https://shop.rockthebells.com/policies/refund-policy
+x-enrichment:
+  date: '2026-08-26'
+  status: enriched
+  artifacts_added: 8
+  pass: local-v1

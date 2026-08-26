@@ -1,0 +1,133 @@
+generated: '2026-08-26'
+method: derived
+source: graphql/rock-the-bells-storefront.graphql, https://shop.rockthebells.com/products.json
+description: >-
+  Entity-relationship graph derived from the live Rock The Bells Storefront GraphQL schema (414
+  types, introspected anonymously on 2026-08-26). Only the commerce and content entities an agent
+  actually traverses are modelled here; the full type set is in the SDL. Identifiers are Shopify
+  global IDs of the form gid://shopify/{Type}/{numeric} — the MCP tool schemas state this format
+  verbatim (e.g. "gid://shopify/Checkout/abc123").
+identifier_scheme:
+  format: gid://shopify/{Type}/{id}
+  examples:
+  - gid://shopify/Product/8728103813180
+  - gid://shopify/Checkout/abc123
+  note: >-
+    The public /products.json endpoint exposes the bare numeric ids (id 8728103813180); the GraphQL
+    and MCP surfaces use the namespaced gid form. An agent moving between the two must translate.
+type_count: 414
+deprecated_field_count: 49
+entities:
+- name: Shop
+  root_query: shop
+  description: The Rock The Bells store itself. Confirmed shop.name = "Rock The Bells".
+  key_fields: [name, description, primaryDomain, paymentSettings, brand]
+  relationships:
+  - {to: Domain, type: has_one, via: primaryDomain}
+  - {to: PaymentSettings, type: has_one, via: paymentSettings}
+  - {to: ShopPolicy, type: has_many, via: privacyPolicy/refundPolicy/shippingPolicy/termsOfService}
+  - {to: Brand, type: has_one, via: brand}
+- name: Product
+  root_query: [product, productByHandle, products, productRecommendations, search, predictiveSearch]
+  description: A merchandise item. 25 returned on page one of /products.json; vendor is "Rock The Bells".
+  key_fields: [id, title, handle, vendor, productType, tags, description, availableForSale, priceRange]
+  relationships:
+  - {to: ProductVariant, type: has_many, via: variants}
+  - {to: Collection, type: has_many, via: collections}
+  - {to: Image, type: has_many, via: images}
+  - {to: Image, type: has_one, via: featuredImage}
+  - {to: ProductOption, type: has_many, via: options}
+  - {to: TaxonomyCategory, type: has_one, via: category}
+  - {to: SellingPlanGroup, type: has_many, via: sellingPlanGroups}
+  - {to: Metafield, type: has_many, via: metafields}
+- name: ProductVariant
+  description: The purchasable SKU — the thing that actually enters a cart line.
+  key_fields: [id, title, sku, availableForSale, price, compareAtPrice, quantityAvailable, selectedOptions]
+  relationships:
+  - {to: Product, type: belongs_to, via: product}
+  - {to: MoneyV2, type: has_one, via: price}
+  - {to: Image, type: has_one, via: image}
+  - {to: SelectedOption, type: has_many, via: selectedOptions}
+  - {to: QuantityRule, type: has_one, via: quantityRule}
+- name: Collection
+  root_query: [collection, collectionByHandle, collections]
+  description: A merchandising grouping. /collections.json listed named collections such as the 2025 Rock The Bells Cruise.
+  key_fields: [id, title, handle, description]
+  relationships:
+  - {to: Product, type: has_many, via: products}
+  - {to: Image, type: has_one, via: image}
+- name: Cart
+  root_query: cart
+  description: The pre-purchase basket. Created and mutated by both the MCP cart tools and the GraphQL cart mutations.
+  key_fields: [id, checkoutUrl, totalQuantity, createdAt, updatedAt, note]
+  relationships:
+  - {to: CartLine, type: has_many, via: lines}
+  - {to: CartBuyerIdentity, type: has_one, via: buyerIdentity}
+  - {to: CartCost, type: has_one, via: cost}
+  - {to: CartDeliveryGroup, type: has_many, via: deliveryGroups}
+  - {to: CartDiscountCode, type: has_many, via: discountCodes}
+  - {to: AppliedGiftCard, type: has_many, via: appliedGiftCards}
+- name: CartLine
+  description: One merchandise line inside a cart.
+  key_fields: [id, quantity]
+  relationships:
+  - {to: Cart, type: belongs_to, via: parentRelationship}
+  - {to: ProductVariant, type: has_one, via: merchandise}
+  - {to: CartLineCost, type: has_one, via: cost}
+  - {to: SellingPlanAllocation, type: has_one, via: sellingPlanAllocation}
+- name: Checkout
+  description: >-
+    NOT a GraphQL type on this API version — the legacy Checkout object has been retired from the
+    Storefront schema in favour of Cart plus cartSubmitForCompletion. Checkout survives as a
+    first-class MCP concept (create/get/update/complete/cancel_checkout, ids of the form
+    gid://shopify/Checkout/...). This is the single largest divergence between the two surfaces and
+    is recorded in the tool crosswalk.
+  exists_in: [mcp]
+  absent_from: [graphql]
+- name: Order
+  root_query: 'via Customer.orders (requires a customer access token)'
+  description: A completed purchase.
+  key_fields: [id, name, orderNumber, processedAt, financialStatus, fulfillmentStatus, statusUrl]
+  relationships:
+  - {to: OrderLineItem, type: has_many, via: lineItems}
+  - {to: MailingAddress, type: has_one, via: shippingAddress}
+  - {to: MailingAddress, type: has_one, via: billingAddress}
+  - {to: DiscountApplication, type: has_many, via: discountApplications}
+  - {to: Customer, type: belongs_to, via: 'Customer.orders (inverse)'}
+- name: Customer
+  root_query: customer
+  description: The buyer account. Gated behind a customerAccessToken.
+  key_fields: [id, email, firstName, lastName, phone, acceptsMarketing]
+  relationships:
+  - {to: Order, type: has_many, via: orders}
+  - {to: MailingAddress, type: has_many, via: addresses}
+  - {to: MailingAddress, type: has_one, via: defaultAddress}
+- name: Blog
+  root_query: [blog, blogByHandle, blogs]
+  description: >-
+    Editorial. Rock The Bells runs five blogs on the storefront — articles, artists, videos,
+    from-jamaica-to-the-bronx and cohh — which is a real content surface, not boilerplate.
+  relationships:
+  - {to: Article, type: has_many, via: articles}
+  - {to: ArticleAuthor, type: has_many, via: authors}
+- name: Article
+  root_query: [article, articles]
+  key_fields: [id, title, handle, publishedAt, excerpt, contentHtml]
+  relationships:
+  - {to: Blog, type: belongs_to, via: blog}
+  - {to: ArticleAuthor, type: has_one, via: authorV2}
+  - {to: Image, type: has_one, via: image}
+  - {to: Comment, type: has_many, via: comments}
+- name: Page
+  root_query: [page, pageByHandle, pages]
+  description: Static pages. 24 published, including about, faq, contact, the-festival and the policy set.
+  relationships:
+  - {to: SEO, type: has_one, via: seo}
+- name: Metaobject
+  root_query: [metaobject, metaobjects]
+  description: Custom structured content the store defines for itself.
+  relationships:
+  - {to: MetaobjectField, type: has_many, via: fields}
+core_flow:
+  description: The traversal an agent follows to go from intent to order.
+  path: Collection/search -> Product -> ProductVariant -> Cart -> CartLine -> (checkout) -> Order

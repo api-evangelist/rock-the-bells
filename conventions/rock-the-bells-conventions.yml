@@ -1,0 +1,158 @@
+generated: '2026-08-26'
+method: probed
+source: >-
+  https://shop.rockthebells.com/llms.txt,
+  https://shop.rockthebells.com/api/ucp/mcp,
+  https://shop.rockthebells.com/api/2024-10/graphql.json,
+  https://shop.rockthebells.com/policies/refund-policy
+description: >-
+  Cross-cutting runtime semantics for the Rock The Bells agent surface, derived from the live MCP
+  tool schemas, the live Storefront GraphQL schema, and the store's published agent instructions
+  and refund policy.
+
+auth_style:
+  summary: >-
+    Anonymous for discovery and read; agent-identified (meta.ucp-agent.profile) on every MCP call;
+    human-approved on payment. No API key issued or required.
+  detail: authentication/rock-the-bells-authentication.yml
+
+idempotency:
+  supported: true
+  grade: verified
+  mechanisms:
+  - surface: MCP
+    operation: complete_checkout
+    parameter: meta.idempotency-key
+    location: request body (meta object)
+    required: false
+    description: 'Declared in the live tool schema as: "An idempotency key for completing the checkout."'
+    evidence: mcp/rock-the-bells-mcp-tools.json
+  - surface: GraphQL
+    operation: shopPayPaymentRequestSessionSubmit
+    parameter: idempotencyKey
+    type: String!
+    required: true
+    description: >-
+      The schema states the argument "ensures the payment transaction occurs only once, preventing
+      duplicate charges." Replay of a used key surfaces as the typed error code
+      IDEMPOTENCY_KEY_ALREADY_USED.
+    evidence: graphql/rock-the-bells-storefront.graphql
+  retention: not stated
+  scope: per checkout / per payment request session
+  note: >-
+    Idempotency is present exactly where it matters most — the money-moving operation on both
+    surfaces — and the replay behaviour is observable as a named error code rather than being left
+    implicit.
+
+reversibility:
+  grade: verified
+  summary: >-
+    Every write surface an agent can reach has a documented reversal path, and the buyer-facing one
+    carries an explicit, stated window.
+  write_surfaces:
+  - surface: MCP
+    action: create_cart
+    reversal: cancel_cart
+    operation_id: cancel_cart
+    window: not stated
+    grade: documented
+    note: A cart is a pre-purchase construct; cancelling it moves no money.
+  - surface: MCP
+    action: create_checkout
+    reversal: cancel_checkout
+    operation_id: cancel_checkout
+    window: before completion
+    grade: documented
+    note: >-
+      cancel_checkout exists as a first-class tool. The docs do not state a time limit, but the
+      practical boundary is completion — once complete_checkout succeeds the order exists and the
+      refund path below applies instead.
+  - surface: order / payment
+    action: complete_checkout (order placed and charged)
+    reversal: refund via return
+    window: 14 days from order receipt
+    grade: verified
+    docs: https://shop.rockthebells.com/policies/refund-policy
+    stated_verbatim: 'We offer a 14-day return policy upon order receipt.'
+    process: >-
+      Returns are initiated by emailing customercare@rockthebells.com with order number, item and
+      reason; a return label is issued to the email on file. Refund follows inspection at the
+      warehouse, which the policy says can take up to 5 business days from receipt, with a further
+      7-10 business days for the refund to appear on the buyer's account.
+    exclusions:
+    - Outbound shipping fees from the original order are not refundable.
+    - Reverse duties on international shipments are the customer's responsibility.
+    - Items must be unused and in the same condition received.
+    - Final sale items cannot be returned, refunded or exchanged.
+    - No exchanges are offered; return and re-order instead.
+    note: >-
+      There is NO self-service refund API. The reversal is real and the window is explicitly stated,
+      but executing it is a human email workflow — an agent can inform a buyer of the window, and
+      cannot action it.
+  - surface: GraphQL
+    action: cartCreate / cartLinesAdd
+    reversal: cartLinesRemove, cartRemovePersonalData
+    window: not stated
+    grade: documented
+
+dry_run_mode:
+  supported: false
+  note: >-
+    No sandbox, test mode, test card or simulation surface is published. An agent cannot rehearse a
+    checkout against this store. Combined with the human-approval invariant, the intended safety
+    model is "a person confirms before money moves" rather than "rehearse first".
+
+pagination:
+  graphql:
+    style: Relay cursor connections
+    params: [first, last, after, before]
+    response_fields: [edges, node, cursor, pageInfo.hasNextPage, pageInfo.hasPreviousPage, pageInfo.startCursor, pageInfo.endCursor]
+    evidence: graphql/rock-the-bells-storefront.graphql
+  rest_json:
+    style: page/limit query parameters on the public Shopify JSON endpoints
+    observed: >-
+      GET /products.json returned 25 products in one page (88,984 bytes) without an explicit page
+      parameter; 25 is the default page size.
+
+error_envelope:
+  graphql:
+    style: typed UserError objects, not HTTP status codes
+    interface: "DisplayableError (fields: field, message)"
+    types: [CartUserError, CartOperationError, CustomerUserError, MetafieldDeleteUserError, MetafieldsSetUserError, UserErrorsShopPayPaymentRequestSessionUserErrors, UserError]
+    result_types: [CompletionError, SubmissionError]
+    note: Mutations return errors inside the payload; HTTP status stays 200.
+  mcp:
+    style: JSON-RPC 2.0 error envelope
+  rfc9457: false
+  detail: errors/rock-the-bells-problem-types.yml
+
+versioning:
+  graphql:
+    scheme: dated calendar versions in the URL path (/api/YYYY-MM/graphql.json)
+    current: '2026-07'
+    probed_against: '2024-10'
+    detail: lifecycle/rock-the-bells-lifecycle.yml
+  ucp:
+    scheme: dated protocol versions
+    current: '2026-04-08'
+    supported: ['2026-04-08', '2026-01-23']
+
+money:
+  representation: integer minor units + ISO 4217 currency code
+  example: '{"amount": 2500, "currency": "USD"} is $25.00'
+  agent_warning: >-
+    Stated verbatim in every MCP tool description: convert to major units before quoting a price to
+    a buyer. Zero-decimal currencies such as JPY are already whole units.
+
+request_context:
+  required_on_every_mcp_call: meta.ucp-agent.profile
+  recommended: [context.address_country, context.currency]
+  rationale: llms.txt — 'Use buyer context ... for accurate pricing and availability.'
+
+request_id_tracing:
+  supported: unknown
+  note: No request-id or correlation header was documented or observed.
+
+rate_limit_signaling:
+  detail: rate-limits/rock-the-bells-rate-limits.yml
+  summary: 429 + backoff on MCP; extensions.cost query budget on GraphQL. No HTTP rate-limit headers observed.

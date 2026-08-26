@@ -1,0 +1,93 @@
+generated: '2026-08-26'
+method: probed
+source: probe of /.well-known/* on every Rock The Bells host, 2026-08-26
+description: >-
+  Well-known probe across all three Rock The Bells hosts. One real document was served: the
+  Universal Commerce Protocol merchant profile at https://shop.rockthebells.com/.well-known/ucp
+  (HTTP 200, application/json, 4,168 bytes), saved verbatim. Every classic well-known path
+  (security.txt, openid-configuration, oauth-authorization-server, api-catalog, ai-plugin.json,
+  agent-card.json, agent.json) returned 404 on every host.
+hosts:
+- host: shop.rockthebells.com
+  note: The live storefront, brand site and agent surface. DNS CNAME to rock-the-bells.myshopify.com.
+  documents:
+  - path: /.well-known/ucp
+    status: 200
+    file: rock-the-bells-ucp.json
+    content_type: application/json; charset=utf-8
+    note: >-
+      Real UCP merchant profile. Declares protocol version 2026-04-08 (plus 2026-01-23), the
+      dev.ucp.shopping service over MCP transport, eight capabilities and three payment handlers.
+  - path: /.well-known/security.txt
+    status: 404
+    file: null
+  - path: /.well-known/api-catalog
+    status: 404
+    file: null
+  - path: /.well-known/agent-card.json
+    status: 404
+    file: null
+  - path: /.well-known/agent.json
+    status: 404
+    file: null
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    file: null
+- host: rock-the-bells.myshopify.com
+  note: The canonical Shopify host the UCP profile points its service endpoints at.
+  documents:
+  - path: /.well-known/ucp
+    status: 200
+    file: null
+    note: Same document as the shop.rockthebells.com copy; not saved twice.
+  - path: /.well-known/agent-card.json
+    status: 404
+    file: null
+  - path: /.well-known/security.txt
+    status: 404
+    file: null
+- host: rockthebells.com
+  note: >-
+    The brand apex. Currently a near-empty Next.js placeholder whose rendered body text is the single
+    line "Rock The Bells Homepage". EVERY path probed returned 404, including /robots.txt and
+    /sitemap.xml. The substantive site lives on shop.rockthebells.com.
+  documents:
+  - path: /.well-known/ucp
+    status: 404
+    file: null
+  - path: /.well-known/security.txt
+    status: 404
+    file: null
+  - path: /.well-known/openid-configuration
+    status: 404
+    file: null
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+    file: null
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+    file: null
+  - path: /.well-known/api-catalog
+    status: 404
+    file: null
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    file: null
+  - path: /.well-known/agent-card.json
+    status: 404
+    file: null
+  - path: /.well-known/agent.json
+    status: 404
+    file: null
+- host: www.rockthebells.com
+  note: >-
+    NOT REACHABLE OVER TLS. www resolves (CNAME rtbs.netlify.app) but the edge presents a
+    DigiCert-issued wildcard certificate for *.netlify.app, which does not match the requested
+    hostname. curl exits 60 ("no alternative certificate subject name matches target host name").
+    Any standards-compliant browser or agent gets a certificate error, so no well-known path on
+    www is reachable at all.
+  documents:
+  - path: /
+    status: 0
+    file: null
+    note: 'TLS hostname mismatch: certificate CN=*.netlify.app does not cover www.rockthebells.com.'

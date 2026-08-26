@@ -64,5 +64,19 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-Rock the Bells is a company surfaced via the API Evangelist harvest backlog (source: secondary-market) and added to the network as a stub for full-pipeline profiling.
-- https://www.nasdaqprivatemarket.com/
+Rock The Bells is the hip-hop culture brand and direct-to-consumer merchandise retailer founded by
+LL COOL J, describing itself on its own storefront as "The Home For All Things Classic and Timeless
+Hip-Hop". It sells apparel and accessories and publishes editorial across five blogs.
+
+It ships no developer program and no OpenAPI, but it does serve a live, anonymously callable agent
+commerce surface on its own host:
+
+- **Website** — https://shop.rockthebells.com/
+- **Agent instructions** — https://shop.rockthebells.com/llms.txt (mirrored at `/agents.md`)
+- **UCP discovery** — https://shop.rockthebells.com/.well-known/ucp (Universal Commerce Protocol 2026-04-08)
+- **MCP endpoint** — `POST https://shop.rockthebells.com/api/ucp/mcp` — 13 tools, full input schemas, no credential
+- **Storefront GraphQL** — https://shop.rockthebells.com/api/2026-07/graphql.json — 414 types, introspectable anonymously
+
+Discovery is open; payment is gated by a stated human-approval invariant rather than by a
+credential. See `skills/` for the packaged agent flows and `mcp/rock-the-bells-tool-crosswalk.yml`
+for what each surface does and does not cover.
