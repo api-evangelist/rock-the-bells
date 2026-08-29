@@ -11,6 +11,17 @@ description: >-
   instruction document at /llms.txt and /agents.md that its robots.txt and a purpose-built
   sitemap_agentic_discovery.xml both point at. Discovery is open; payment is gated by a stated
   human-approval invariant rather than by a credential.
+deliveryModel:
+  model: saas
+  open_source: false
+  commercial: true
+  callable_host: false
+  label: Hosted service · you call their endpoint
+  confidence: medium
+  source:
+  - pricing
+  generated: '2026-08-28'
+  method: derived
 image: https://shop.rockthebells.com/cdn/shop/files/RTB-Logo_dbd6e9a5-9b51-485a-970c-04d742548a60.png?v=1749612774
 url: https://raw.githubusercontent.com/api-evangelist/rock-the-bells/refs/heads/main/apis.yml
 x-type: company
