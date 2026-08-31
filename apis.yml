@@ -34,6 +34,19 @@ modified: '2026-08-26'
 tags:
 - Company
 - Retail
+- E-Commerce
+- Merchandise
+- Apparel
+- Agentic Commerce
+- MCP
+- Universal Commerce Protocol
+- GraphQL
+- Media
+- Music
+- Hip-Hop
+tags_raw:
+- Company
+- Retail
 - Ecommerce
 - Merchandise
 - Apparel
@@ -83,6 +96,11 @@ apis:
   humanURL: https://shop.rockthebells.com/llms.txt
   baseURL: https://shop.rockthebells.com/api/2026-07/graphql.json
   tags:
+  - GraphQL
+  - E-Commerce
+  - Catalog
+  - Cart
+  tags_raw:
   - GraphQL
   - Ecommerce
   - Catalog
