@@ -1,16 +1,14 @@
 aid: rock-the-bells
 name: Rock The Bells
-description: >-
-  Rock The Bells is the hip-hop culture brand and direct-to-consumer merchandise retailer founded by
-  LL COOL J, describing itself on its own storefront as "The Home For All Things Classic and Timeless
-  Hip-Hop". It sells apparel and accessories and publishes editorial across five blogs (features,
-  artists, videos, From Jamaica to the Bronx, and COHH). It ships no developer program and no
-  OpenAPI, but it does serve a live, anonymously callable agent commerce surface: a Universal
-  Commerce Protocol (UCP 2026-04-08) merchant profile at /.well-known/ucp, a 13-tool Model Context
-  Protocol server at /api/ucp/mcp, a fully introspectable Storefront GraphQL API, and an agent
-  instruction document at /llms.txt and /agents.md that its robots.txt and a purpose-built
-  sitemap_agentic_discovery.xml both point at. Discovery is open; payment is gated by a stated
-  human-approval invariant rather than by a credential.
+description: 'Rock The Bells is the hip-hop culture brand and direct-to-consumer merchandise retailer
+  founded by LL COOL J, describing itself on its own storefront as "The Home For All Things Classic and
+  Timeless Hip-Hop". It sells apparel and accessories and publishes editorial across five blogs (features,
+  artists, videos, From Jamaica to the Bronx, and COHH). It ships no developer program and no OpenAPI,
+  but it does serve a live, anonymously callable agent commerce surface: a Universal Commerce Protocol
+  (UCP 2026-04-08) merchant profile at /.well-known/ucp, a 13-tool Model Context Protocol server at /api/ucp/mcp,
+  a fully introspectable Storefront GraphQL API, and an agent instruction document at /llms.txt and /agents.md
+  that its robots.txt and a purpose-built sitemap_agentic_discovery.xml both point at. Discovery is open;
+  payment is gated by a stated human-approval invariant rather than by a credential.'
 deliveryModel:
   model: saas
   open_source: false
@@ -72,15 +70,14 @@ tags_raw:
 - Music
 - Hip-Hop
 apis:
-- aid: rock-the-bells-commerce-mcp
+- aid: rock-the-bells:rock-the-bells-commerce-mcp
   name: Rock The Bells Commerce MCP Server (UCP)
-  description: >-
-    A live, remote Model Context Protocol server on Rock The Bells' own storefront host implementing
+  description: A live, remote Model Context Protocol server on Rock The Bells' own storefront host implementing
     the Universal Commerce Protocol shopping service. Thirteen tools let an agent search the catalog,
-    look up and retrieve products, build and cancel a cart, and create, update, complete or cancel a
-    checkout, plus retrieve an order. Every tool carries a complete JSON Schema 2020-12 inputSchema,
-    enumerated anonymously — no API key, no OAuth challenge. Completing payment requires
-    contemporaneous human buyer approval, which the store states in both llms.txt and robots.txt.
+    look up and retrieve products, build and cancel a cart, and create, update, complete or cancel a checkout,
+    plus retrieve an order. Every tool carries a complete JSON Schema 2020-12 inputSchema, enumerated
+    anonymously — no API key, no OAuth challenge. Completing payment requires contemporaneous human buyer
+    approval, which the store states in both llms.txt and robots.txt.
   humanURL: https://shop.rockthebells.com/llms.txt
   baseURL: https://shop.rockthebells.com/api/ucp/mcp
   tags:
@@ -99,14 +96,13 @@ apis:
     url: json-schema/rock-the-bells-ucp-tool-schemas.json
   - type: Documentation
     url: https://shop.rockthebells.com/llms.txt
-- aid: rock-the-bells-storefront-graphql
+- aid: rock-the-bells:rock-the-bells-storefront-graphql
   name: Rock The Bells Storefront GraphQL API
-  description: >-
-    The Shopify Storefront GraphQL API as served on Rock The Bells' own domain. Full introspection
+  description: The Shopify Storefront GraphQL API as served on Rock The Bells' own domain. Full introspection
     succeeded anonymously on 2026-08-26, returning a 414-type schema with 34 root query fields and 41
-    mutations covering products, variants, collections, carts, customer accounts, blogs, articles,
-    pages and Shop Pay payment request sessions. Dated calendar versioning in the URL path; every
-    response carries an extensions.cost query budget.
+    mutations covering products, variants, collections, carts, customer accounts, blogs, articles, pages
+    and Shop Pay payment request sessions. Dated calendar versioning in the URL path; every response carries
+    an extensions.cost query budget.
   humanURL: https://shop.rockthebells.com/llms.txt
   baseURL: https://shop.rockthebells.com/api/2026-07/graphql.json
   tags:
